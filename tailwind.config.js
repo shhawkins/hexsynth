@@ -41,6 +41,9 @@ export default {
           '100%': { backgroundPosition: '-200% 0' },
         }
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
     },
   },
   plugins: [],

@@ -2,10 +2,11 @@ import { useEffect, useState, useMemo } from 'react';
 import { AudioEngine, type VoiceType, type LoopTrack } from './audio/AudioEngine';
 import { HexagonInstrument } from './components/HexagonInstrument';
 import { WaveformVisualizer } from './components/WaveformVisualizer';
+import { OnboardingModal } from './components/OnboardingModal';
 import { RotaryDial } from './components/RotaryDial';
 import { EFFECT_TYPES, type EffectType } from './audio/effects';
 import type { Point } from './utils/geometry';
-import { Mic, Play, Square, Settings as SettingsIcon, Ghost, Activity, Trash2, ChevronDown, Power } from 'lucide-react';
+import { Mic, Play, Square, Settings as SettingsIcon, Ghost, Activity, Trash2, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 
 const engine = AudioEngine.getInstance();
@@ -137,29 +138,7 @@ function App() {
     }, [center, hexRadius, isMobile]);
 
     if (!started) {
-        return (
-            <div className="flex h-screen w-full flex-col items-center justify-center bg-hex-bg text-hex-text relative">
-                <div className="absolute inset-0 tech-lines opacity-10"></div>
-                <div className="z-10 flex flex-col items-center glass-panel p-12 rounded-xl animate-fade-in max-w-sm sm:max-w-md mx-4 border border-white/5">
-                    <div className="flex flex-col items-center mb-8">
-                        <div className="text-3xl font-light tracking-[0.2em] text-white fade-in">
-                            HEXAGON
-                        </div>
-                        <div className="text-xs tracking-[0.4em] text-gray-500 uppercase mt-2">Synthesizer System</div>
-                    </div>
-
-                    <button
-                        onClick={handleStart}
-                        className="btn-minimal px-8 py-3 text-sm font-medium tracking-widest rounded-full group transition-all"
-                    >
-                        <span className="flex items-center gap-2">
-                            <Power size={14} className="group-hover:text-hex-accent transition-colors" />
-                            INITIALIZE
-                        </span>
-                    </button>
-                </div>
-            </div>
-        );
+        return <OnboardingModal onStart={handleStart} />;
     }
 
     return (
