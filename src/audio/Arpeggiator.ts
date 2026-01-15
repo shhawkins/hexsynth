@@ -69,7 +69,7 @@ export class Arpeggiator {
         this.sortedNotes = Array.from(this.activeNotes).sort((a, b) => a - b);
     }
 
-    private tick(time: number) {
+    private tick(_time: number) {
         if (!this.isEnabled || this.sortedNotes.length === 0) return;
 
         let noteToPlay: number | number[] | null = null;

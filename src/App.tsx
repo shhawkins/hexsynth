@@ -317,9 +317,7 @@ function App() {
                         const current = prev[key] || { x: false, y: false, xInv: false, yInv: false, p: false };
                         return {
                             ...prev,
-                            [key]: axis === 'xInv' || axis === 'yInv'
-                                ? { ...current, [axis]: !current[axis as any] } // Toggle inversion
-                                : { ...current, [axis]: !current[axis as any] } // Toggle active
+                            [key]: { ...current, [axis]: !current[axis] }
                         };
                     });
                 }}

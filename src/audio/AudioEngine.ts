@@ -187,7 +187,6 @@ export class AudioEngine {
     // Initialize Arpeggiator
     this.arpeggiator = new Arpeggiator((freq) => {
       // Trigger a short note
-      const voice = new Voice(this.currentVoiceType, this.effectBus);
 
       let duration = 0.5;
       // @ts-ignore
