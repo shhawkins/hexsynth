@@ -17,7 +17,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onStart }) => 
 
                 <div className="flex flex-col items-center mb-10 relative z-10">
                     <h1 className="text-4xl font-light tracking-[0.2em] text-white fade-in drop-shadow-md text-center">
-                        HEXASYNTH
+                        HEXSYNTH
                     </h1>
                     <div className="text-xs tracking-[0.4em] text-hex-accent uppercase mt-3 font-semibold">THEREMIN SYNTHESIZER</div>
                 </div>
