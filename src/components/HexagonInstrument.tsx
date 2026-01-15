@@ -9,9 +9,14 @@ interface HexagonInstrumentProps {
   height: number;
   effectBadgePos: Point;
   setEffectBadgePos: (p: Point) => void;
-  colors: string[]; // We will ignore these passed props for the grid and use a custom palette
+  colors: string[];
   ghostNotesEnabled: boolean;
   octaveRange: number;
+  modulations: { x: boolean, y: boolean }[];
+  masterVolume: number;
+  volMod: { x: boolean, y: boolean };
+  toneMod: { x: boolean, y: boolean };
+  toneBase: number;
   onNoteActive: (color: string) => void;
 }
 
@@ -28,9 +33,14 @@ export const HexagonInstrument: React.FC<HexagonInstrumentProps> = ({
   height,
   effectBadgePos,
   setEffectBadgePos,
-  colors: propColors, // Rename to avoid confusion, we'll use a better palette
+  colors: propColors,
   ghostNotesEnabled,
   octaveRange,
+  modulations,
+  masterVolume,
+  volMod,
+  toneMod,
+  toneBase,
   onNoteActive
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -168,10 +178,65 @@ export const HexagonInstrument: React.FC<HexagonInstrumentProps> = ({
     // Pitch follows Y (Vertical) - Up (normY=1) is High Pitch
     const freq = minNote * Math.pow(maxNote / minNote, normY);
 
-    // Volume follows X (Horizontal) - Right (normX=1) is Loud, Left is Quiet
-    const vol = Math.max(0, Math.min(1, normX));
+    // Calculate Volume with Modulation
+    let volFactor = 1.0;
+    if (volMod.x || volMod.y) {
+      let factors = [];
+      if (volMod.x) factors.push(Math.max(0, Math.min(1, normX)));
+      if (volMod.y) factors.push(Math.max(0, Math.min(1, normY)));
 
+      // Use average of enabled modulators
+      const sum = factors.reduce((a, b) => a + b, 0);
+      volFactor = sum / factors.length;
+    }
+    const vol = masterVolume * volFactor; // Scale base volume by modulation
+
+    // Calculate Tone with Modulation
+    let toneFactor = 1.0;
+    if (toneMod.x || toneMod.y) {
+      let factors = [];
+      // Tone mod: X or Y maps 0..1 to modulation factor
+      if (toneMod.x) factors.push(Math.max(0, Math.min(1, normX)));
+      if (toneMod.y) factors.push(Math.max(0, Math.min(1, normY)));
+
+      const sum = factors.reduce((a, b) => a + b, 0);
+      toneFactor = sum / factors.length;
+    }
+    // Tone usually sets a filter frequency. 
+    // If modulation is on, we scale the Base Tone.
+    // If Base Tone is 1.0 (Open), and mod is 0.5, effective is 0.5.
+    const finalTone = toneBase * toneFactor;
+
+    engine.setTone(finalTone);
     engine.startNote(id, freq, vol);
+
+    // Apply Modulations
+    // Note: If multiple touches, the last one updates the effects.
+    // If we want multiple touches to average, we'd need more logic, but "last takes precedence" is standard for single-parameter control.
+    modulations.forEach((mod, i) => {
+      if (mod.x || mod.y) {
+        let strength = 0;
+        // Strategy: additive or max?
+        // If X and Y are both active, maybe average?
+        // "Tie any effect to x or y".
+        // If X (Pitch) is active, Pitch drives it.
+        // If Y (Vol) is active, Vol drives it.
+
+        // Re-normalize for effect strength (0-1)
+        const pitchStrength = Math.max(0, Math.min(1, normY));
+        const volStrength = Math.max(0, Math.min(1, normX));
+
+        if (mod.x && mod.y) {
+          strength = (pitchStrength + volStrength) / 2;
+        } else if (mod.x) {
+          strength = volStrength; // X Axis (Volume)
+        } else if (mod.y) {
+          strength = pitchStrength; // Y Axis (Pitch)
+        }
+
+        engine.updateEffectParameter(i, strength);
+      }
+    });
   };
 
   const updateEffectsFromBadge = (pos: Point) => {
@@ -179,8 +244,12 @@ export const HexagonInstrument: React.FC<HexagonInstrumentProps> = ({
     const maxDist = radius;
 
     dists.forEach((d, i) => {
-      const strength = Math.max(0, 1 - (d / maxDist));
-      engine.updateEffectParameter(i, strength);
+      // Only update from badge if modulation is NOT active for this effect
+      // This prevents fighting between badge position and note modulation
+      if (!modulations[i].x && !modulations[i].y) {
+        const strength = Math.max(0, 1 - (d / maxDist));
+        engine.updateEffectParameter(i, strength);
+      }
     });
   };
 

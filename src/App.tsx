@@ -6,7 +6,8 @@ import { OnboardingModal } from './components/OnboardingModal';
 import { RotaryDial } from './components/RotaryDial';
 import { EFFECT_TYPES, type EffectType } from './audio/effects';
 import type { Point } from './utils/geometry';
-import { Mic, Play, Square, Settings as SettingsIcon, Ghost, Activity, Trash2, ChevronDown } from 'lucide-react';
+import { Mic, Play, Square, Settings as SettingsIcon, Ghost, Activity, Trash2, ChevronDown, Sliders } from 'lucide-react';
+import { EffectsControlPanel } from './components/EffectsControlPanel';
 import { clsx } from 'clsx';
 
 const engine = AudioEngine.getInstance();
@@ -65,6 +66,9 @@ function App() {
     const [voiceType, setVoiceType] = useState<VoiceType>('sine');
     const [octave, setOctave] = useState(2);
     const [tone, setTone] = useState(0.8);
+    const [masterVolume, setMasterVolume] = useState(0.8);
+    const [volMod, setVolMod] = useState({ x: true, y: false });
+    const [toneMod, setToneMod] = useState({ x: false, y: false });
     const [rootNote, setRootNote] = useState('C');
     const [tracks, setTracks] = useState<LoopTrack[]>(engine.tracks);
     const [, setForceUpdate] = useState(0);
@@ -74,6 +78,11 @@ function App() {
     const [isSettingsOpen, setIsSettingsOpen] = useState(true);
     const [isTelemetryOpen, setIsTelemetryOpen] = useState(false);
     const [isLooperOpen, setIsLooperOpen] = useState(true);
+    const [isEffectsPanelOpen, setIsEffectsPanelOpen] = useState(false);
+    const [activeEffectIndex, setActiveEffectIndex] = useState<number | null>(null);
+    const [modulations, setModulations] = useState<{ x: boolean, y: boolean }[]>(
+        Array(6).fill({ x: false, y: false })
+    );
 
     useEffect(() => {
         if (started) {
@@ -171,9 +180,22 @@ function App() {
                     colors={sideColors}
                     ghostNotesEnabled={ghostNotesEnabled}
                     octaveRange={octave}
+                    modulations={modulations}
+                    masterVolume={masterVolume}
+                    volMod={volMod}
+                    toneMod={toneMod}
+                    toneBase={tone}
                     onNoteActive={() => { }}
                 />
             </div>
+
+            <EffectsControlPanel
+                engine={engine}
+                isOpen={isEffectsPanelOpen}
+                onClose={() => setIsEffectsPanelOpen(false)}
+                activeEffectIndex={activeEffectIndex}
+                onEffectChange={handleEffectChange}
+            />
 
             {/* Effect Menus - Overlay */}
             <div className="absolute inset-0 z-20 pointer-events-none">
@@ -199,6 +221,42 @@ function App() {
                                 <option key={eff} value={eff}>{eff}</option>
                             ))}
                         </select>
+
+                        {/* Modulation Controls */}
+                        {effects[i] && (
+                            <div className="flex gap-1 mt-1 justify-center">
+                                <button
+                                    className={clsx("text-[8px] px-1.5 py-0.5 rounded border transition-colors font-mono",
+                                        modulations[i].x ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
+                                    onClick={() => {
+                                        const newMods = [...modulations];
+                                        newMods[i] = { ...newMods[i], x: !newMods[i].x };
+                                        setModulations(newMods);
+                                    }}
+                                    title="Modulate with Volume (X Axis)"
+                                >X</button>
+                                <button
+                                    className={clsx("text-[8px] px-1.5 py-0.5 rounded border transition-colors font-mono",
+                                        modulations[i].y ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
+                                    onClick={() => {
+                                        const newMods = [...modulations];
+                                        newMods[i] = { ...newMods[i], y: !newMods[i].y };
+                                        setModulations(newMods);
+                                    }}
+                                    title="Modulate with Pitch (Y Axis)"
+                                >Y</button>
+                                <button
+                                    className="text-[8px] px-1.5 py-0.5 rounded border border-white/10 bg-black/40 text-gray-500 hover:text-white transition-colors"
+                                    onClick={() => {
+                                        setActiveEffectIndex(i);
+                                        setIsEffectsPanelOpen(true);
+                                    }}
+                                    title="Effect Settings"
+                                >
+                                    <Sliders size={8} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -250,24 +308,72 @@ function App() {
                             />
                         </div>
 
-                        <div className="flex justify-center items-center gap-4 pt-2">
+                        <div className="flex justify-center items-end gap-2 pt-2">
+                            {/* Volume Control */}
+                            <div className="flex flex-col items-center gap-1">
+                                <RotaryDial
+                                    label="VOL"
+                                    value={Math.round(masterVolume * 100).toString()}
+                                    options={[]}
+                                    onChange={() => { }}
+                                    continuous={true}
+                                    min={0}
+                                    max={1}
+                                    val={masterVolume}
+                                    onValueChange={setMasterVolume}
+                                    size={40}
+                                />
+                                <div className="flex gap-1">
+                                    <button
+                                        className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
+                                            volMod.x ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
+                                        onClick={() => setVolMod(p => ({ ...p, x: !p.x }))}
+                                        title="Modulate with X"
+                                    >X</button>
+                                    <button
+                                        className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
+                                            volMod.y ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
+                                        onClick={() => setVolMod(p => ({ ...p, y: !p.y }))}
+                                        title="Modulate with Y"
+                                    >Y</button>
+                                </div>
+                            </div>
+
+                            {/* Tone Control */}
+                            <div className="flex flex-col items-center gap-1">
+                                <RotaryDial
+                                    label="TONE"
+                                    value={Math.round(tone * 100).toString()}
+                                    options={[]} // Continuous dial simulation
+                                    onChange={() => { /* handled by onValueChange */ }}
+                                    continuous={true}
+                                    min={0}
+                                    max={1}
+                                    val={tone}
+                                    onValueChange={(v) => {
+                                        setTone(v);
+                                        // engine.setTone(v); // Now handled in Instrument
+                                    }}
+                                    size={40}
+                                />
+                                <div className="flex gap-1">
+                                    <button
+                                        className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
+                                            toneMod.x ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
+                                        onClick={() => setToneMod(p => ({ ...p, x: !p.x }))}
+                                        title="Modulate with X"
+                                    >X</button>
+                                    <button
+                                        className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
+                                            toneMod.y ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
+                                        onClick={() => setToneMod(p => ({ ...p, y: !p.y }))}
+                                        title="Modulate with Y"
+                                    >Y</button>
+                                </div>
+                            </div>
+
                             <RotaryDial
-                                label="TONE"
-                                value={Math.round(tone * 100).toString()}
-                                options={[]} // Continuous dial simulation
-                                onChange={() => { /* handled by onValueChange */ }}
-                                continuous={true}
-                                min={0}
-                                max={1}
-                                val={tone}
-                                onValueChange={(v) => {
-                                    setTone(v);
-                                    engine.setTone(v);
-                                }}
-                                size={50}
-                            />
-                            <RotaryDial
-                                label="ROOT NOTE"
+                                label="ROOT"
                                 value={rootNote}
                                 options={['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']}
                                 onChange={(n) => {
@@ -276,7 +382,7 @@ function App() {
                                     const freq = 261.63 * Math.pow(2, idx / 12);
                                     engine.rootFreq = freq;
                                 }}
-                                size={50}
+                                size={40}
                             />
                         </div>
                     </div>

@@ -190,6 +190,24 @@ export class AudioEngine {
     }
   }
 
+  public setEffectParam(index: number, key: string, value: number) {
+    const effect = this.effects[index];
+    if (!effect) return;
+
+    // @ts-ignore
+    const param = effect[key];
+
+    if (param && typeof param.value === 'number') {
+      // It's a AudioParam or Signal
+      // @ts-ignore
+      param.value = value;
+    } else {
+      // It might be a regular property (like distortion amount on some nodes)
+      // @ts-ignore
+      effect[key] = value;
+    }
+  }
+
   private rebuildEffectChain() {
     this.effectBus.disconnect();
     this.toneFilter.disconnect();
