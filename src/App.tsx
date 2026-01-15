@@ -162,7 +162,7 @@ function App() {
         return { x: dimensions.width - 132, y: 140 };
     }, [dimensions, isMobile, isLandscape]);
 
-    const activeEffectTypes = useMemo(() => effects.filter((e): e is string => !!e), [effects]);
+    const activeEffectTypes = useMemo(() => effects.filter((e): e is EffectType => !!e), [effects]);
 
     // Position hexagon based on layout
     const center = getCenter(dimensions.width, dimensions.height);
