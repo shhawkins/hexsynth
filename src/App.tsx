@@ -68,7 +68,6 @@ function App() {
     const [tracks, setTracks] = useState<LoopTrack[]>(engine.tracks);
     const [, setForceUpdate] = useState(0);
     const [ghostNotesEnabled, setGhostNotesEnabled] = useState(true);
-    const [activeColor, setActiveColor] = useState('#00f0ff');
 
     // Panel States
     const [isSettingsOpen, setIsSettingsOpen] = useState(true);
@@ -193,7 +192,7 @@ function App() {
                     colors={sideColors}
                     ghostNotesEnabled={ghostNotesEnabled}
                     octaveRange={octave}
-                    onNoteActive={setActiveColor}
+                    onNoteActive={() => { }}
                 />
             </div>
 
