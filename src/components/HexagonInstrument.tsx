@@ -161,11 +161,15 @@ export const HexagonInstrument: React.FC<HexagonInstrumentProps> = ({
     let normX = (x - minX) / (maxX - minX);
     let normY = 1 - ((y - minY) / (maxY - minY));
 
+    // Swap: X is Volume (Loudness), Y is Pitch (Up=High)
     const minNote = engine.rootFreq * Math.pow(2, 0);
     const maxNote = engine.rootFreq * Math.pow(2, octaveRange);
 
-    const freq = minNote * Math.pow(maxNote / minNote, normX);
-    const vol = Math.max(0, Math.min(1, normY));
+    // Pitch follows Y (Vertical) - Up (normY=1) is High Pitch
+    const freq = minNote * Math.pow(maxNote / minNote, normY);
+
+    // Volume follows X (Horizontal) - Right (normX=1) is Loud, Left is Quiet
+    const vol = Math.max(0, Math.min(1, normX));
 
     engine.startNote(id, freq, vol);
   };
@@ -239,7 +243,7 @@ export const HexagonInstrument: React.FC<HexagonInstrumentProps> = ({
       });
       ctx.shadowBlur = 0;
 
-      // 3. Grid (Techy but clean)
+      // 3. Grid (Techy but clean) - HORIZONTAL for Pitch
       // Add semitone lines back, but cleaner
       const totalNotes = 12 * octaveRange;
       const notchCount = totalNotes;
@@ -247,35 +251,54 @@ export const HexagonInstrument: React.FC<HexagonInstrumentProps> = ({
       const topY = centerY - hexHalfHeight;
       const bottomY = centerY + hexHalfHeight;
       const leftX = centerX - radius;
-      const hexWidth = radius * 2;
+      const rightX = centerX + radius; // Fix: Defined rightX
+
+      // Define grid height range matching the note range
+      const gridHeight = bottomY - topY;
+
+      ctx.save();
+      // Clip to Hexagon so horizontal lines don't bleed
+      ctx.beginPath();
+      vertices.forEach((v, i) => {
+        if (i === 0) ctx.moveTo(v.x, v.y);
+        else ctx.lineTo(v.x, v.y);
+      });
+      ctx.closePath();
+      ctx.clip();
 
       ctx.globalAlpha = 0.8;
       for (let i = 0; i <= notchCount; i++) {
-        const x = leftX + (i / notchCount) * hexWidth;
+        // Calculate Y for this pitch step
+        // Pitch Low (i=0) -> BottomY
+        // Pitch High (i=max) -> TopY
+        const y = bottomY - (i / notchCount) * gridHeight;
+
         const isRoot = i % 12 === 0;
 
         if (isRoot) {
           // Root Note Line - Visible
           ctx.beginPath();
-          ctx.moveTo(x, topY);
-          ctx.lineTo(x, bottomY);
+          ctx.moveTo(leftX, y);
+          ctx.lineTo(rightX, y);
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
           ctx.lineWidth = 1;
           ctx.stroke();
         } else {
-          // Semitone Ticks (Top and Bottom only) - Faint
-          const tickSize = 3;
+          // Semitone Lines - Faint
+          // We draw full lines across and let the hexagon clip handle the edges
           ctx.beginPath();
-          ctx.moveTo(x, topY);
-          ctx.lineTo(x, topY + tickSize);
-          ctx.moveTo(x, bottomY);
-          ctx.lineTo(x, bottomY - tickSize);
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+          ctx.moveTo(leftX, y);
+          ctx.lineTo(rightX, y);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'; // Very faint
           ctx.lineWidth = 1;
+          // dash?
+          // ctx.setLineDash([2, 4]); // Optional: make them dashed
           ctx.stroke();
+          // ctx.setLineDash([]);
         }
       }
       ctx.globalAlpha = 1;
+      ctx.restore();
 
       // 4. Ghost Notes (Luminous dots)
       if (ghostNotesEnabled && engine.masterLoopDuration) {

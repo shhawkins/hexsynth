@@ -27,19 +27,45 @@ export const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ analyzer
       ctx.beginPath();
       // Medium thickness
       ctx.lineWidth = 2;
-      ctx.strokeStyle = color;
-      ctx.globalAlpha = 0.8;
+      // Dynamic Color calculation based on amplitude/frequency content roughly
+      const rms = Math.sqrt(values.reduce((acc, val) => acc + (val as number) * (val as number), 0) / values.length);
+      // Map RMS to Hue shift? Or just use a rainbow gradient like the hex?
+
+      const gradient = ctx.createLinearGradient(0, 0, width, 0);
+      gradient.addColorStop(0, '#00f0ff');
+      gradient.addColorStop(0.2, '#ff0055');
+      gradient.addColorStop(0.4, '#ccff00');
+      gradient.addColorStop(0.6, '#aa00ff');
+      gradient.addColorStop(0.8, '#ffffff');
+      gradient.addColorStop(1, '#ffaa00');
+
+      ctx.strokeStyle = gradient;
+      ctx.globalAlpha = 0.8 + Math.min(0.2, rms); // Pulse opacity
 
       // Nice bloom
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = color;
+      ctx.shadowBlur = 10 + rms * 20; // Dynamic glow
+      ctx.shadowColor = 'rgba(255,255,255,0.5)';
 
       const sliceWidth = width / values.length;
       let x = 0;
 
+      // Add padding to prevent clipping at top/bottom (values are -1 to 1)
+      const padding = 10;
+      const usableHeight = height - padding * 2;
+
       for (let i = 0; i < values.length; i++) {
         const v = values[i] as number;
-        const y = (v + 1) / 2 * height;
+        // Map -1..1 to padded height range
+        // v=-1 -> y = height - padding
+        // v=1 -> y = padding
+        // y = ((v + 1) / 2) * usableHeight + padding --- No wait, standard mapping:
+        // (1 - (v + 1) / 2) * usableHeight + padding ? 
+        // Tone.Waveform returns -1 to 1.
+        // Screen Y: 0 is top.
+        // We want 1 to be top (padding), -1 to be bottom (height-padding)
+        // inverse: y = height/2 - (v * usableHeight/2)
+
+        const y = (height / 2) + (v * (usableHeight / 2));
 
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);

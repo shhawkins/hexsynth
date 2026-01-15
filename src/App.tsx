@@ -63,6 +63,7 @@ function App() {
     const [badgePos, setBadgePos] = useState<Point>({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
     const [voiceType, setVoiceType] = useState<VoiceType>('sine');
     const [octave, setOctave] = useState(2);
+    const [tone, setTone] = useState(0.8);
     const [rootNote, setRootNote] = useState('C');
     const [tracks, setTracks] = useState<LoopTrack[]>(engine.tracks);
     const [, setForceUpdate] = useState(0);
@@ -271,7 +272,22 @@ function App() {
                             />
                         </div>
 
-                        <div className="flex justify-center pt-2">
+                        <div className="flex justify-center items-center gap-4 pt-2">
+                            <RotaryDial
+                                label="TONE"
+                                value={Math.round(tone * 100).toString()}
+                                options={[]} // Continuous dial simulation
+                                onChange={() => { /* handled by onValueChange */ }}
+                                continuous={true}
+                                min={0}
+                                max={1}
+                                val={tone}
+                                onValueChange={(v) => {
+                                    setTone(v);
+                                    engine.setTone(v);
+                                }}
+                                size={50}
+                            />
                             <RotaryDial
                                 label="ROOT NOTE"
                                 value={rootNote}
@@ -289,8 +305,8 @@ function App() {
                 </GlassPanel>
             </div>
 
-            {/* RIGHT TOP PANEL: Telemetry */}
-            <div className="absolute top-4 right-4 z-40 w-44 sm:w-48 pointer-events-none flex flex-col items-end">
+            {/* RIGHT TOP PANEL: Telemetry - HIDDEN */}
+            {false && <div className="absolute top-4 right-4 z-40 w-44 sm:w-48 pointer-events-none flex flex-col items-end">
                 <GlassPanel
                     title="TELEMETRY"
                     icon={Activity}
@@ -320,10 +336,10 @@ function App() {
                         </div>
                     </div>
                 </GlassPanel>
-            </div>
+            </div>}
 
-            {/* RIGHT BOTTOM PANEL: Looper */}
-            <div className="absolute bottom-4 right-4 z-40 w-72 sm:w-80 pointer-events-none flex flex-col items-end">
+            {/* RIGHT BOTTOM PANEL: Looper - HIDDEN */}
+            {false && <div className="absolute bottom-4 right-4 z-40 w-72 sm:w-80 pointer-events-none flex flex-col items-end">
                 <GlassPanel
                     title="LOOPER"
                     icon={Mic}
@@ -409,7 +425,7 @@ function App() {
                         </div>
                     </div>
                 </GlassPanel>
-            </div>
+            </div>}
 
         </div>
     );
