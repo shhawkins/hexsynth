@@ -287,7 +287,7 @@ function App() {
             {/* LEFT PANEL: Settings */}
             <div className={clsx("absolute top-2 z-40 pointer-events-none transition-all duration-300", isMobile ? "left-2 right-2" : "top-4 left-4 w-56")}>
                 <GlassPanel
-                    title="SYNTH ENGINE"
+                    title="HEXSYNTH"
                     icon={SettingsIcon}
                     isOpen={isSettingsOpen}
                     onToggle={() => setIsSettingsOpen(!isSettingsOpen)}
