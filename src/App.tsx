@@ -95,8 +95,8 @@ function App() {
     const [octave, setOctave] = useState(2);
     const [tone, setTone] = useState(0.8);
     const [masterVolume, setMasterVolume] = useState(0.8);
-    const [volMod, setVolMod] = useState<ModulationState>({ x: false, y: false, xInv: false, yInv: false, p: false });
-    const [toneMod, setToneMod] = useState<ModulationState>({ x: true, y: true, xInv: false, yInv: false, p: false });
+    const [volMod, setVolMod] = useState<ModulationState>({ x: true, y: false, xInv: false, yInv: false, p: false });
+    const [toneMod, setToneMod] = useState<ModulationState>({ x: false, y: false, xInv: false, yInv: false, p: false });
     const [rootNote, setRootNote] = useState('C');
     const [scaleType, setScaleType] = useState<ScaleType>('chromatic');
     const [chordType, setChordType] = useState<ChordType>('off');
@@ -359,12 +359,16 @@ function App() {
                                 {isMobile && (
                                     <button
                                         onClick={() => setExpandedControlId(expandedControlId === i ? null : i)}
-                                        className="text-gray-500 hover:text-white/80 transition-colors p-2 -m-1 active:scale-90 flex items-center justify-center w-8 h-6"
+                                        className="text-gray-500 hover:text-white/80 transition-colors p-2 -m-1 active:scale-90 flex items-center justify-center w-8 h-6 relative"
                                     >
                                         <ChevronDown
                                             size={10}
                                             className={clsx("transition-transform duration-200", expandedControlId === i && "rotate-180")}
                                         />
+                                        {/* Mobile Mod Active Indicator */}
+                                        {expandedControlId !== i && Object.entries(paramModulations).some(([k, v]) => k.startsWith(`${i}:`) && (v.x || v.y || v.p)) && (
+                                            <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-hex-accent shadow-[0_0_4px_#ccff00]"></div>
+                                        )}
                                     </button>
                                 )}
                                 <div className={clsx(
@@ -663,9 +667,15 @@ function App() {
                                 <div className="mt-2 border-t border-white/5 pt-1">
                                     <button
                                         onClick={() => setIsCompToolsOpen(!isCompToolsOpen)}
-                                        className="w-full flex items-center justify-between text-[9px] uppercase text-gray-500 hover:text-gray-300 transition-colors py-1"
+                                        className="w-full flex items-center justify-between text-[9px] uppercase text-gray-500 hover:text-gray-300 transition-colors py-1 group"
                                     >
-                                        <span className="tracking-wider">Composition Tools</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="tracking-wider">Composition Tools</span>
+                                            {/* Collapsed Active Indicator */}
+                                            {!isCompToolsOpen && (scaleType !== 'chromatic' || chordType !== 'off' || arpEnabled) && (
+                                                <div className="w-1.5 h-1.5 rounded-full bg-hex-accent shadow-[0_0_4px_#ccff00] animate-pulse"></div>
+                                            )}
+                                        </div>
                                         <ChevronDown size={10} className={clsx("transition-transform duration-200", isCompToolsOpen && "rotate-180")} />
                                     </button>
 
@@ -693,8 +703,16 @@ function App() {
                                                         className="select-minimal w-full px-2 py-1 text-[9px] rounded-sm"
                                                     >
                                                         <option value="off">Off</option>
-                                                        <option value="triad">Triad</option>
-                                                        <option value="seventh">7th</option>
+                                                        <option value="triad">Triad (1-3-5)</option>
+                                                        <option value="sus2">Sus2</option>
+                                                        <option value="sus4">Sus4</option>
+                                                        <option value="maj7">Maj 7th</option>
+                                                        <option value="m7">Min 7th</option>
+                                                        <option value="dom7">Dom 7th</option>
+                                                        <option value="maj9">Maj 9th</option>
+                                                        <option value="m9">Min 9th</option>
+                                                        <option value="dim">Dimc (Triad)</option>
+                                                        <option value="aug">Aug (Triad)</option>
                                                     </select>
                                                 </div>
                                             </div>
