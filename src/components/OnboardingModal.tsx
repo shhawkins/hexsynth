@@ -106,7 +106,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onStart, isRet
                                 <div className="flex-1">
                                     <div className="text-[10px] text-white leading-relaxed">
                                         <span className="text-hex-accent font-semibold">Effects:</span> Each hexagon side has an effect slot.
-                                        <span className="text-gray-400"> Use dropdowns to swap, gear icon for deep settings.</span>
+                                        <span className="text-gray-400"> Tap vertices to swap, gear icon for deep settings.</span>
                                     </div>
                                 </div>
                             </div>

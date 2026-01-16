@@ -195,18 +195,19 @@ const EffectControls = ({ engine, effect, index, effectName, paramModulations, o
                             engine.updateEffectParameter(index, parseFloat(e.target.value));
                             setTick(t => t + 1);
                         }}
+                        onPointerDown={(e) => e.stopPropagation()}
                         className="slider-minimal w-full"
                     />
                     <div className="flex justify-end gap-1">
                         <button
                             className={clsx("text-[9px] px-2 py-0.5 rounded border transition-colors font-mono",
                                 paramModulations[`${index}:wet`]?.x ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
-                            onClick={() => onModulationChange(`${index}:wet`, 'x')}
+                            onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onModulationChange(`${index}:wet`, 'x'); }}
                         >X</button>
                         <button
                             className={clsx("text-[9px] px-2 py-0.5 rounded border transition-colors font-mono",
                                 paramModulations[`${index}:wet`]?.y ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
-                            onClick={() => onModulationChange(`${index}:wet`, 'y')}
+                            onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onModulationChange(`${index}:wet`, 'y'); }}
                         >Y</button>
                     </div>
                 </div>
@@ -237,18 +238,19 @@ const EffectControls = ({ engine, effect, index, effectName, paramModulations, o
                                 min={p.min} max={p.max} step={p.step}
                                 value={currentVal}
                                 onChange={(e) => handleChange(p.key, parseFloat(e.target.value))}
+                                onPointerDown={(e) => e.stopPropagation()}
                                 className="slider-minimal w-full"
                             />
                             <div className="flex justify-end gap-1">
                                 <button
                                     className={clsx("text-[9px] px-2 py-0.5 rounded border transition-colors font-mono",
                                         paramModulations[`${index}:${p.key}`]?.x ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
-                                    onClick={() => onModulationChange(`${index}:${p.key}`, 'x')}
+                                    onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onModulationChange(`${index}:${p.key}`, 'x'); }}
                                 >X</button>
                                 <button
                                     className={clsx("text-[9px] px-2 py-0.5 rounded border transition-colors font-mono",
                                         paramModulations[`${index}:${p.key}`]?.y ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
-                                    onClick={() => onModulationChange(`${index}:${p.key}`, 'y')}
+                                    onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onModulationChange(`${index}:${p.key}`, 'y'); }}
                                 >Y</button>
                             </div>
                         </div>

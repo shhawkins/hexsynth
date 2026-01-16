@@ -38,7 +38,7 @@ export const RegionSelector: React.FC<RegionSelectorProps> = ({
     return (
         <div className={clsx("flex gap-1", className)}>
             <button
-                onClick={(e) => { e.stopPropagation(); onChange('top'); }}
+                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onChange('top'); }}
                 className={clsx(
                     "rounded flex items-center justify-center transition-all p-0.5 border",
                     value === 'top' ? "bg-hex-accent text-black border-hex-accent" : "bg-white/5 text-gray-500 border-white/5 hover:bg-white/10"
@@ -49,7 +49,7 @@ export const RegionSelector: React.FC<RegionSelectorProps> = ({
             </button>
 
             <button
-                onClick={(e) => { e.stopPropagation(); onChange('whole'); }}
+                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onChange('whole'); }}
                 className={clsx(
                     "rounded flex items-center justify-center transition-all p-0.5 border",
                     value === 'whole' ? "bg-hex-accent text-black border-hex-accent" : "bg-white/5 text-gray-500 border-white/5 hover:bg-white/10"
@@ -60,7 +60,7 @@ export const RegionSelector: React.FC<RegionSelectorProps> = ({
             </button>
 
             <button
-                onClick={(e) => { e.stopPropagation(); onChange('bottom'); }}
+                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onChange('bottom'); }}
                 className={clsx(
                     "rounded flex items-center justify-center transition-all p-0.5 border",
                     value === 'bottom' ? "bg-hex-accent text-black border-hex-accent" : "bg-white/5 text-gray-500 border-white/5 hover:bg-white/10"

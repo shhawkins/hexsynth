@@ -58,7 +58,7 @@ const GlassPanel = ({
     )}>
         <div
             className={clsx("panel-header p-3 flex items-center justify-between group rounded-t-lg", !isOpen && "rounded-lg border-b-0")}
-            onClick={onToggle}
+            onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); onToggle(); }}
         >
             <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-gray-300 font-sans tracking-wide text-[10px] font-semibold group-hover:text-white transition-colors uppercase">
@@ -421,6 +421,7 @@ function App() {
                             className="w-full bg-black/60 border border-white/10 text-gray-300 text-[9px] uppercase outline-none backdrop-blur-sm appearance-none text-center cursor-pointer transition-all hover:bg-black/80 hover:text-white rounded py-1 pl-2"
                             value={effects[i] || ''}
                             onChange={(e) => handleEffectChange(i, e.target.value)}
+                            onPointerDown={(e) => e.stopPropagation()}
                             style={{
                                 borderLeftColor: sideColors[i]
                             }}
@@ -437,7 +438,10 @@ function App() {
                             <div className="flex flex-col items-center mt-1">
                                 {isMobile && (
                                     <button
-                                        onClick={() => setExpandedControlId(expandedControlId === i ? null : i)}
+                                        onPointerDown={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedControlId(expandedControlId === i ? null : i);
+                                        }}
                                         className="text-gray-500 hover:text-white/80 transition-colors p-2 -m-1 active:scale-90 flex items-center justify-center w-8 h-6 relative"
                                     >
                                         <ChevronDown
@@ -462,10 +466,15 @@ function App() {
                                             isMobile ? "text-[8px] px-1.5 py-0.5" : "text-[12px] px-2 py-1",
                                             paramModulations[`${i}:wet`]?.x ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30"
                                         )}
-                                        onClick={() => handleModToggle(`${i}:wet`, 'x')}
+                                        onPointerDown={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleModToggle(`${i}:wet`, 'x');
+                                        }}
                                         title="Modulate with Volume (X Axis) - Double tap to invert"
                                         onContextMenu={(e) => {
                                             e.preventDefault();
+                                            e.stopPropagation();
                                             handleModToggle(`${i}:wet`, 'x', true);
                                         }}
                                     >
@@ -477,10 +486,15 @@ function App() {
                                             isMobile ? "text-[8px] px-1.5 py-0.5" : "text-[12px] px-2 py-1",
                                             paramModulations[`${i}:wet`]?.y ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30"
                                         )}
-                                        onClick={() => handleModToggle(`${i}:wet`, 'y')}
+                                        onPointerDown={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleModToggle(`${i}:wet`, 'y');
+                                        }}
                                         title="Modulate with Pitch (Y Axis) - Double tap to invert"
                                         onContextMenu={(e) => {
                                             e.preventDefault();
+                                            e.stopPropagation();
                                             handleModToggle(`${i}:wet`, 'y', true);
                                         }}
                                     >
@@ -488,7 +502,11 @@ function App() {
                                     </button>
                                     {isIPad() && (
                                         <button
-                                            onClick={() => handleModToggle(`${i}:wet`, 'p')}
+                                            onPointerDown={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleModToggle(`${i}:wet`, 'p');
+                                            }}
                                             className={clsx(
                                                 "rounded border transition-colors font-mono",
                                                 isMobile ? "text-[8px] px-1.5 py-0.5" : "text-[12px] px-2 py-1",
@@ -504,7 +522,9 @@ function App() {
                                             "rounded border border-white/10 bg-black/40 text-gray-500 hover:text-white transition-colors",
                                             isMobile ? "text-[8px] px-1.5 py-0.5" : "text-[12px] px-2 py-1"
                                         )}
-                                        onClick={() => {
+                                        onPointerDown={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
                                             setActiveEffectIndex(i);
                                             setIsEffectsPanel(true);
                                         }}
@@ -538,7 +558,7 @@ function App() {
                         headerRight={
                             started && !showHelpModal ? (
                                 <button
-                                    onClick={(e) => { e.stopPropagation(); setShowHelpModal(true); }}
+                                    onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); setShowHelpModal(true); }}
                                     className="w-5 h-5 rounded-full flex items-center justify-center text-gray-500 hover:text-hex-accent transition-colors"
                                     title="Help"
                                 >
@@ -560,7 +580,7 @@ function App() {
                                             <div className="flex items-center gap-2">
                                                 {/* Visualizer Toggle */}
                                                 <button
-                                                    onClick={() => setVisualizerMode(prev => prev === 'rose' ? 'none' : 'rose')}
+                                                    onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); setVisualizerMode(prev => prev === 'rose' ? 'none' : 'rose'); }}
                                                     className={clsx(
                                                         "w-5 h-5 rounded flex items-center justify-center transition-all",
                                                         visualizerMode === 'rose'
@@ -574,7 +594,9 @@ function App() {
 
                                                 {/* Reset Button moved here */}
                                                 <button
-                                                    onClick={() => {
+                                                    onPointerDown={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
                                                         engine.reset();
 
                                                         // Reset State
@@ -615,6 +637,7 @@ function App() {
                                             value={voiceType}
                                             onChange={e => { setVoiceType(e.target.value as any); engine.setVoiceType(e.target.value as any); }}
                                             className="select-minimal w-full px-2 py-1 text-[10px] rounded-sm"
+                                            onPointerDown={(e) => e.stopPropagation()}
                                         >
                                             <option value="sine">Sine Wave</option>
                                             <option value="triangle">Triangle</option>
@@ -643,6 +666,7 @@ function App() {
                                                 engine.octaveRange = v;
                                             }}
                                             className="slider-minimal w-full"
+                                            onPointerDown={(e) => e.stopPropagation()}
                                         />
                                     </div>
                                 </div>
@@ -668,20 +692,20 @@ function App() {
                                             <button
                                                 className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
                                                     volMod.x ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
-                                                onClick={() => handleModToggle('vol', 'x')}
-                                                onContextMenu={(e) => { e.preventDefault(); handleModToggle('vol', 'x', true); }}
+                                                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('vol', 'x'); }}
+                                                onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('vol', 'x', true); }}
                                                 title="Modulate with X (Right click to invert)"
                                             >{volMod.xInv ? "X↓" : "X"}</button>
                                             <button
                                                 className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
                                                     volMod.y ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
-                                                onClick={() => handleModToggle('vol', 'y')}
-                                                onContextMenu={(e) => { e.preventDefault(); handleModToggle('vol', 'y', true); }}
+                                                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('vol', 'y'); }}
+                                                onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('vol', 'y', true); }}
                                                 title="Modulate with Y (Right click to invert)"
                                             >{volMod.yInv ? "Y↓" : "Y"}</button>
                                             {isIPad() && (
                                                 <button
-                                                    onClick={() => handleModToggle('vol', 'p')}
+                                                    onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('vol', 'p'); }}
                                                     className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
                                                         volMod.p ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
                                                     title="Modulate with Pencil Pressure"
@@ -713,20 +737,20 @@ function App() {
                                             <button
                                                 className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
                                                     toneMod.x ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
-                                                onClick={() => handleModToggle('tone', 'x')}
-                                                onContextMenu={(e) => { e.preventDefault(); handleModToggle('tone', 'x', true); }}
+                                                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('tone', 'x'); }}
+                                                onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('tone', 'x', true); }}
                                                 title="Modulate with X (Right click to invert)"
                                             >{toneMod.xInv ? "X↓" : "X"}</button>
                                             <button
                                                 className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
                                                     toneMod.y ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
-                                                onClick={() => handleModToggle('tone', 'y')}
-                                                onContextMenu={(e) => { e.preventDefault(); handleModToggle('tone', 'y', true); }}
+                                                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('tone', 'y'); }}
+                                                onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('tone', 'y', true); }}
                                                 title="Modulate with Y (Right click to invert)"
                                             >{toneMod.yInv ? "Y↓" : "Y"}</button>
                                             {isIPad() && (
                                                 <button
-                                                    onClick={() => handleModToggle('tone', 'p')}
+                                                    onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleModToggle('tone', 'p'); }}
                                                     className={clsx("text-[8px] w-4 h-4 rounded border transition-colors font-mono flex items-center justify-center",
                                                         toneMod.p ? "bg-hex-accent text-black border-hex-accent" : "bg-black/40 text-gray-500 border-white/10 hover:border-white/30")}
                                                     title="Modulate with Pencil Pressure"
@@ -761,6 +785,7 @@ function App() {
                                                 }}
                                                 className="slider-minimal w-full relative z-10"
                                                 style={{ height: '20px' }}
+                                                onPointerDown={(e) => e.stopPropagation()}
                                             />
                                         </div>
                                         {/* Tick marks */}
@@ -775,7 +800,7 @@ function App() {
                                 {/* Advanced / Composition Tools Toggle */}
                                 <div className="mt-2 border-t border-white/5 pt-1">
                                     <button
-                                        onClick={() => setIsCompToolsOpen(!isCompToolsOpen)}
+                                        onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); setIsCompToolsOpen(!isCompToolsOpen); }}
                                         className="w-full flex items-center justify-between text-[9px] uppercase text-gray-500 hover:text-gray-300 transition-colors py-1 group"
                                     >
                                         <div className="flex items-center gap-2">
@@ -841,7 +866,9 @@ function App() {
                                                         <RegionSelector value={arpRegion} onChange={setArpRegion} size={14} />
                                                     </div>
                                                     <button
-                                                        onClick={() => {
+                                                        onPointerDown={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
                                                             const newVal = !arpEnabled;
                                                             setArpEnabled(newVal);
                                                             engine.setArpEnabled(newVal);
